@@ -1,4 +1,5 @@
 ﻿using Laserfiche.PdfImporter.Helpers;
+using Laserfiche.PdfImporter.Models;
 using Laserfiche.PdfImporter.Repository;
 using PdfToImage;
 using System.IO;
@@ -22,7 +23,7 @@ namespace Laserfiche.PdfImporter.Services
             _converter.OutputFormat = "tiffg4";
         }
 
-        public bool Import(string pdfPath)
+        public PdfImporterResponse Import(string pdfPath)
         {
             if (!Directory.Exists(pdfPath))
                 throw new System.ArgumentException($"Path {pdfPath} not exists");
@@ -44,10 +45,10 @@ namespace Laserfiche.PdfImporter.Services
                 }
                 _laserficheRepository.ImportDocument(
                     $@"{lfPath}\{Path.GetFileNameWithoutExtension(fileInfo.Name)}",
-                    lfVolume, file);
+                    lfVolume, tifFile);
             }
 
-            return true;
+            return new PdfImporterResponse();
         }
         
     }

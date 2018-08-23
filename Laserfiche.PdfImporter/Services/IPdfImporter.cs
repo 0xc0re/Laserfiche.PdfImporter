@@ -1,7 +1,9 @@
-﻿namespace Laserfiche.PdfImporter.Services
+﻿using Laserfiche.PdfImporter.Models;
+
+namespace Laserfiche.PdfImporter.Services
 {
     public interface IPdfImporter
     {
-        bool Import(string pdfPath);
+        PdfImporterResponse Import(string pdfPath);
     }
 }

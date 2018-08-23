@@ -1,6 +1,7 @@
 ﻿using Laserfiche.DocumentServices;
 using Laserfiche.PdfImporter.Helpers;
 using Laserfiche.RepositoryAccess;
+using Nuaguil.Security;
 using System;
 
 namespace Laserfiche.PdfImporter.Repository
@@ -20,14 +21,20 @@ namespace Laserfiche.PdfImporter.Repository
             var repositoryRegistration = new RepositoryRegistration(server, repository);
 
             _session = new Session();
-            _session.LogIn(user, password, repositoryRegistration);
+            //_session.LogIn(user, password, repositoryRegistration);
+            var impersonate = new ImpersonationHelper("ssf", user, password);
+            impersonate.Impersonate(() => _session.LogIn(repositoryRegistration));
         }
 
         public void ImportDocument(string laserfichePath, string volume, string filePath)
         {
-            using (DocumentInfo document = new DocumentInfo(_session))
+            using (EntryInfo entry = Entry.TryGetEntryInfo(laserfichePath, _session) ?? new DocumentInfo(_session))
             {
-                document.Create(laserfichePath, volume, EntryNameOption.AutoRename);
+                if (!(entry is DocumentInfo document))
+                    throw new Exception($"Error creating laserfiche document {laserfichePath}");
+
+                if(document.IsNew)
+                    document.Create(laserfichePath, volume, EntryNameOption.AutoRename);
 
                 DocumentImporter importer = new DocumentImporter
                 {
